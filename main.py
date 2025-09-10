@@ -1,8 +1,9 @@
 import pandas as pd
-from utils import normalizeStr, normalizeUrl, strictMatch
+from utils import normalizeStr, normalizeUrl, strictMatch, similarlyMatch
 
 
-result = []
+couplageFort = []
+couplageProbable = []
 
 df = pd.read_csv('data.csv')
 
@@ -19,8 +20,19 @@ df["key_canonique"] = (
     df["posted_date"].astype(str)
 )
 
-result.extend(strictMatch(df, "url_norm", "url_match"))
-result.extend(strictMatch(df, "key_canonique", "titre+entreprise+ville+date_match"))
-result.extend(strictMatch(df, "base_id", "external_id_match"))
+couplageFort.extend(strictMatch(df, "url_norm", "url_match"))
+couplageFort.extend(strictMatch(df, "key_canonique", "titre+entreprise+ville+date_match"))
+couplageFort.extend(strictMatch(df, "base_id", "external_id_match"))
 
-print(result)
+couplageProbable.extend(similarlyMatch(df, "description", "similarité_description≥0.85"))
+couplageProbable.extend(similarlyMatch(df, "key_canonique", "similarité_titre+entreprise+ville+date≥0.85"))
+
+result ={
+    "Forts": couplageFort,
+    "Probables": couplageProbable
+}
+
+with open('result.json', 'w') as f:
+    json.dump(result, f)
+
+print("Resultat ecrit dans result.json")
