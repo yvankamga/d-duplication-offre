@@ -1,8 +1,10 @@
 import pandas as pd
-from utils import normalizeStr, normalizeUrl
+from utils import normalizeStr, normalizeUrl, strictMatch
 
 
-df = pd.read_csv('offres.csv')
+result = []
+
+df = pd.read_csv('data.csv')
 
 df["titre_norm"] = df["title"].apply(normalizeStr)
 df["entreprise_norm"] = df["company"].apply(normalizeStr)
@@ -17,5 +19,8 @@ df["key_canonique"] = (
     df["posted_date"].astype(str)
 )
 
+result.extend(strictMatch(df, "url_norm", "url_match"))
+result.extend(strictMatch(df, "key_canonique", "titre+entreprise+ville+date_match"))
+result.extend(strictMatch(df, "base_id", "external_id_match"))
 
-print(df.head())
+print(result)
